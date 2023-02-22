@@ -52,9 +52,11 @@ int main(void) {
 
     if (USART1_available() > 0) {
       while (USART1_available() > 0) {
-        printf("%c", USART1_read());
+        printf("%c", USART1_read());/// in kí tự được gửi đến từ serial monitor
      }
-     /// in kí tự được gửi đến từ serial monitor
+     /// USART1_available() : Chức năng giống như hàm Serial.available của arduino
+      /// Hàm này trả về số byte dữ liệu có trong bộ đệm. Nó thường được dùng để xét xem đã có dữ liệu chưa, hoặc lượng dữ liệu cần nhận đã đủ chưa
+     /// USART1_read() : hàm đọc kí tự (kiểu char) mà USART1 nhận được (receive)
       printf("\n");
       LED_TOGGLE();
     }
