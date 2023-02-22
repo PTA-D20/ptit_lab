@@ -1,0 +1,114 @@
+@( goto:_start )&( copy /y HexUpload.cmd.txt temp.cmd > NUL )&( temp.cmd %HEX% )
+
+:_exit
+( del /q temp.cmd )&( exit %ERRORLEVEL% )
+
+:_start
+@echo off
+
+
+::-----------------------------------------------------------------------------
+:: Step 1 - Select Uploader
+:call:SetX  HEX_UPLOADER    None
+:call:SetX  HEX_UPLOADER "Serial COM_PORT 7"
+:call:SetX  HEX_UPLOADER  STLink
+ call:SetX  HEX_UPLOADER   JLink
+
+::-----------------------------------------------------------------------------
+:: Step 2 - Set Uploader Path
+call:SetX  SERIAL_EXE  "C:\Program Files (x86)\STMicroelectronics\Software\Flash Loader Demo\STMFlashLoader.exe"
+call:SetX  STLINK_EXE  "C:\Program Files (x86)\STMicroelectronics\st_toolset\stvp\STVP_CmdLine.exe"
+call:SetX   JLINK_EXE  "C:\Program Files (x86)\SEGGER\JLink_V612d\JLink.exe"
+
+::-----------------------------------------------------------------------------
+:: Step 3 - Add EmBitz project options
+::   Build options -> Pre/Post build steps -> Post-build steps (Always)
+::     cmd.exe /c cmd /q /k set HEX=$(TARGET_OUTPUT_DIR)$(TARGET_OUTPUT_BASENAME) < HexUpload.cmd.txt
+::-----------------------------------------------------------------------------
+
+
+::-----------------------------------------------------------------------------
+set HEXFILE=%1.hex
+for %%A in (*_flash.ld) do  set DEVICE=%%~nA
+call :%DEVICE:~5,-6%_%HEX_UPLOADER%
+
+
+::-----------------------------------------------------------------------------
+:SetX
+  if not defined %1  set %1=%~2
+  exit /b
+
+::-----------------------------------------------------------------------------
+:Serial
+  set COM_PORT=%1
+  set BAUDRATE=115200
+  set  TIMEOUT=500
+  set  ADDRESS=8000000
+  (
+    exit
+  ) | "%SERIAL_EXE%"                                       ^
+        -c --pn %COM_PORT% --br %BAUDRATE% --to %TIMEOUT%  ^
+        -i %2                                              ^
+        -e --all                                           ^
+        -d --a %ADDRESS% --fn %HEXFILE%                    ^
+        -r --a %ADDRESS%
+
+  call:_exit
+
+::-----------------------------------------------------------------------------
+:STLink
+  "%STLINK_EXE%"        ^
+    -BoardName=ST-LINK  ^
+    -Port=USB           ^
+    -ProgMode=SWD       ^
+    -Device=%1          ^
+    -erase              ^
+    -no_loop            ^
+    -no_log             ^
+    -FileProg=%HEXFILE%
+  call:_exit
+
+::-----------------------------------------------------------------------------
+:JLink
+  (
+    echo  r
+    echo  loadfile %HEXFILE%
+    echo  rnh
+    echo  exit
+  ) | "%JLINK_EXE%"     ^
+        -if SWD         ^
+        -speed 4000     ^
+        -device %1      ^
+        -AutoConnect 1  ^
+        -ExitOnError 1
+  call:_exit
+
+
+::----- Serial ----------------------------------------------------------------
+:f103c8_Serial
+:f103cb_Serial
+  call :Serial  %2  STM32F1_Med-density_128K
+
+:f030f4_Serial
+:f030k6_Serial
+  call :Serial  %2  STM32F0_3x_32K
+
+::----- STLink ----------------------------------------------------------------
+:f103c8_STLink
+:f103cb_STLink
+  call :STLink  STM32F103xB
+
+:f030f4_STLink
+:f030k6_STLink
+  call :STLink  STM32F030x6
+
+::----- JLink -----------------------------------------------------------------
+:f103c8_JLink
+:f103cb_JLink
+  call :JLink  STM32F103CB
+
+:f030f4_JLink
+:f030k6_JLink
+  call :JLink  STM32F030K6
+
+::-----------------------------------------------------------------------------
