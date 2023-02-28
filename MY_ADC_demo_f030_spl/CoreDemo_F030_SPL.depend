@@ -216,8 +216,9 @@
 	"Core.h"
 	<stdio.h>
 
-1677049067 source:c:\users\admin\onedrive\máy tính\ptit_team_lab\stm32v2\stm32v2\librarydemo\my_adc_demo_f030_spl\src\main.c
+1677564852 source:c:\users\admin\onedrive\máy tính\ptit_team_lab\stm32v2\stm32v2\librarydemo\my_adc_demo_f030_spl\src\main.c
 	<stdio.h>
+	<math.h>
 	"Core.h"
 	"ADC.h"
 

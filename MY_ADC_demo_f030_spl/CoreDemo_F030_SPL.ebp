@@ -31,7 +31,9 @@
 					<Add option="-Wa,--no-warn" />
 				</Assembler>
 				<Linker>
+					<Add option="-u _scanf_float" />
 					<Add option="-Wl,--gc-sections" />
+					<Add library="m" />
 				</Linker>
 			</Target>
 		</Build>
