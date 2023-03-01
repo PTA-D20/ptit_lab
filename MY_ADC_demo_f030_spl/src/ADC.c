@@ -90,7 +90,7 @@
 
 
 
-    ADC1->CFGR2 = ADC_ClockMode_AsynClk;  /// (AsynClk,SynClkDiv2,SynClkDiv4)
+    ADC1->CFGR2 = ADC_ClockMode_SynClkDiv2;  /// (AsynClk,SynClkDiv2,SynClkDiv4)
     /// Cấu hình nguồn clock cho ADC
     /// Tham khảo ở phần 12.4.3 ADC clock (CKMODE)
 

@@ -59,7 +59,7 @@ int main(void)
   F030_GPIO_pinMode_input(GPIOA, 6, GPIO_Mode_AN, GPIO_PuPd_NOPULL);
   /// Cấu hình cho chân PA6 là chế độ vào Analog, không có điện trở kéo
   /// Tham khảo thư viện stm32f0xx_gpio.h và Core.h
-  uint16_t adc_read_time_avg = 0;
+
   ADC1_begin();
   /// Khởi động, cấu hình cho ADC, chi tiết xem tại ADC.c
 
@@ -95,6 +95,7 @@ int main(void)
         printf(" //////////////////////////BAT DAU IN//////////////////////////////////////////\n");
         LED_HIGH(LED_1_PORT,LED_1_PIN); /// bật led 1 => báo hiệu mạch đang ở trạng thái in kết quả
 
+        uint16_t sum_adc_read_time = 0;
         for(int i=0;i<length_;i++){
 //          printf("bat dau: %12u  ",time_start_point[i]);
 //          /// thoi diem bat dau chu ky
@@ -108,13 +109,18 @@ int main(void)
           printf("time_gap: %12u  ",time_end_point[i] - time_start_point[i]);
           /// in khoảng thời gian trong một chu kỳ đọc triết áp
 
-          printf("time_delay: %12u   ", adc_start_point[i] - time_start_point[i]);
+          ///printf("time_delay: %12u   ", adc_start_point[i] - time_start_point[i]);
           /// in khoang thoi gian cua ham delay tao ra
 
           uint8_t adc_read_time = time_end_point[i] - adc_start_point[i];
-          adc_read_time_avg+= adc_read_time;
+          /// tính thời gian hoạt động của hàm ADC1_read16()
+
+          sum_adc_read_time+= adc_read_time;
+          /// tính tổng cộng dồn adc_read_time nhằm phục vụ tính trung bình thời gian hoạt động của hàm ADC1_read16()
+
           //printf("time_ADC_read: %12u   ",time_end_point[i] - adc_start_point[i] );
-          printf("time_ADC_read: %12u   ",adc_read_time);
+          printf("ADC_read_time: %12u   ",adc_read_time);
+          /// in ra thời gian hoạt động của hàm ADC1_read16()
 
           printf("gia tri do: %u\n",adc_arr[i]);
           /// in giá trị triết áp đọc được
@@ -123,7 +129,7 @@ int main(void)
         }
 
         printf(" /////////////////////////////////////////KET THUC///////////////////////////////////////////////////\n");
-        printf("tong adc_time: %6u\n",adc_read_time_avg);
+        printf("tong adc_time: %6u\n",sum_adc_read_time);
         LED_LOW(LED_1_PORT,LED_1_PIN); /// led 1 tắt => báo hiệu mạch kết thúc trạng thái in kết quả.
 }
 
